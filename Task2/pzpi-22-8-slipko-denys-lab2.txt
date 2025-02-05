@@ -1,0 +1,261 @@
+Міністерство освіти та науки України Харківський національний університет радіоелектроніки
+
+
+Кафедра ПІ
+
+
+
+Звіт
+З лабораторної роботи 2
+Тема роботи: «РОЗРОБКА БАЗИ ДАНИХ ДЛЯ СЕРВЕРНОЇ ЧАСТИНИ ПРОГРАМНОЇ СИСТЕМИ ТА ПРИКЛАДНОГО ПРОГРАМНОГО ІНТЕРФЕЙСУ (API)»
+з дисципліни «Аналіз та рефакторинг коду»
+
+
+
+
+
+
+Виконав:	Перевірив:
+ст. гр. ПЗПІ-22-8	ст. викладач Сокорчук І.П.
+Сліпко Д.В	 
+
+
+
+
+
+
+
+
+
+
+
+Харків 2024
+ 
+Мета роботи: На лабораторній роботі №2 потрібно розробити базу  даних для серверної частини  програмної системи та прикладного  програмного інтерфейсу.
+Хід роботи: 
+Розробити будову програмної системи.
+1.	Створити UML діаграму прецедентів для серверної частини системи.
+Діаграма прецедентів для системи моніторингу автопарків відображає взаємодію між користувачами (адміністратором, користувачем і гостем) та функціональністю системи.
+ 
+Рисунок 1.1 – UML діаграму прецедентів
+
+2.	Створити ER діаграму даних.
+ 
+Рисунок 2.1 – ER діаграма даних
+
+3.	Розробити базу даних (БД) програмної системи.
+Ми створили чотири таблиці для бази даних, що описують транспортні засоби, користувачів, маршрути та сповіщення. Ось запити для створення кожної з них:
+
+-- Таблиця "Маршрути" (Routes)
+CREATE TABLE [dbo].[Routes](
+    [id] INT IDENTITY(1,1) PRIMARY KEY,
+    [name] VARCHAR(100) NOT NULL,
+    [start_point] VARCHAR(100) NULL,
+    [end_point] VARCHAR(100) NULL
+);
+
+-- Таблиця "Зупинки" (Stops)
+CREATE TABLE [dbo].[Stops](
+    [id] INT IDENTITY(1,1) PRIMARY KEY,
+    [route_id] INT NOT NULL,
+    [name] VARCHAR(100) NOT NULL,
+    [latitude] FLOAT NOT NULL,
+    [longitude] FLOAT NOT NULL,
+    [order_index] INT NULL,
+    FOREIGN KEY ([route_id]) REFERENCES [dbo].[Routes] ([id]) ON DELETE CASCADE
+);
+
+-- Таблиця "Користувачі" (Users)
+CREATE TABLE [dbo].[Users](
+    [id] INT IDENTITY(1,1) PRIMARY KEY,
+    [username] NVARCHAR(50) NOT NULL UNIQUE,
+    [password_hash] NVARCHAR(255) NOT NULL,
+    [role] NVARCHAR(20) NULL
+);
+
+-- Таблиця "Транспортні засоби" (Vehicles)
+CREATE TABLE [dbo].[Vehicles](
+    [id] INT IDENTITY(1,1) PRIMARY KEY,
+    [route_id] INT NOT NULL,
+    [type] VARCHAR(50) NOT NULL,
+    [number] VARCHAR(20) NOT NULL,
+    [status] VARCHAR(50) NULL,
+    FOREIGN KEY ([route_id]) REFERENCES [dbo].[Routes] ([id]) ON DELETE CASCADE
+);
+
+-- Таблиця "Локації транспорту" (Vehicle_Locations)
+CREATE TABLE [dbo].[Vehicle_Locations](
+    [id] INT IDENTITY(1,1) PRIMARY KEY,
+    [vehicle_id] INT NOT NULL,
+    [latitude] FLOAT NOT NULL,
+    [longitude] FLOAT NOT NULL,
+    [timestamp] DATETIME NULL,
+    FOREIGN KEY ([vehicle_id]) REFERENCES [dbo].[Vehicles] ([id]) ON DELETE CASCADE
+);
+
+Ці таблиці є основою для зберігання та організації даних про транспортні засоби, користувачів, маршрути та сповіщення в базі даних.
+4.	Створити діаграму структури БД. 
+Було створено ER-діаграму, яка відображає основні сутності транспортноїсистеми: маршрути, зупинки, транспортні засоби, користувачів та їхні взаємозв’язки. Це дозволяє наочно зрозуміти логіку збереження та взаємодії даних, що сприяє ефективному управлінню транспортною інфраструктурою.
+ 
+Рисунок 4.1 – Діаграма структури БД
+
+5.	Розробити функції роботи з БД (ORM або CoRM тощо).
+Для роботи з базою даних були розроблені функції, що реалізують основні операції системи, зокрема реєстрацію та авторизацію користувачів, додавання нових маршрутів, зупинок і транспортних засобів. Ці функції інтегруються з базою даних Microsoft SQL Server, виконуючи SQL-запити для створення, оновлення, отримання та видалення даних. У Додатку А наведено відповідний програмний код для демонстрації реалізації цих функцій.
+6.	Розробити API (REST або GraphQL, gRPC тощо) для взаємодії серверної частини з клієнтами.
+Для забезпечення ефективної взаємодії між серверною частиною та клієнтами було розроблено REST API. API включає ключові функціональні можливості, такі як управління користувачами, маршрутами, зупинками та транспортними засобами. Реалізація передбачає використання стандартних HTTP-методів (GET, POST, DELETE) для отримання, додавання та видалення даних. Код для виконання завдання наведено у Додатку Б.
+7. Створення програмної реалізації розробленого API
+Програмна реалізація розробленого API забезпечує інтерактивну взаємодію між серверною частиною та клієнтами. Це дозволяє клієнтам виконувати операції, такі як реєстрація, авторизація користувачів, а також додавання нових автомобілів і маршрутів у систему. Для розробки API було використано технології Node.js, Express, Microsoft SQL Server та Swagger для документування.
+ 
+Рисунок 7.1 – Розроблений API
+Висновки: У процесі розробки було створено RESTful API, яке забезпечує взаємодію між серверною частиною та клієнтами. API реалізує ключові функції, зокрема реєстрацію та авторизацію користувачів, а також управління маршрутами, зупинками та транспортними засобами. Використання фреймворку Express.js для обробки HTTP-запитів та Microsoft SQL Server для збереження даних дозволило створити ефективну, безпечну та масштабовану серверну частину. Документування API за допомогою Swagger значно спростило тестування та інтеграцію з клієнтською частиною. 
+Додаток А – Функції роботи з БД
+
+require("dotenv").config({ path: "./backend/.env" });
+const sql = require('mssql');
+const config = {
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    server: process.env.DB_SERVER,
+    database: process.env.DB_DATABASE,
+    options: {
+        encrypt: true,
+        trustServerCertificate: true
+    }
+};
+async function connectDB() {
+    try {
+        await sql.connect(config);
+        console.log(' Підключено до SQL Server!');
+    } catch (err) {
+        console.error('Помилка:', err.message);
+    }
+}
+module.exports = { connectDB, sql };
+
+//Функція для авторизації користувача
+router.post("/login", async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        if (!username || !password) {
+            return res.status(400).json({ error: "Усі поля обов'язкові" });
+        }
+
+        // Перевіряємо, чи існує користувач у БД
+        const result = await sql.query`SELECT * FROM Users WHERE username = ${username}`;
+        const user = result.recordset[0];
+        if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+            return res.status(401).json({ error: "Невірний логін або пароль" });
+        }
+        res.json({ message: "Авторизація успішна" });
+    } catch (error) {
+        console.error("Помилка авторизації:", error.message);
+        res.status(500).json({ error: "Помилка сервера" });
+    }
+});
+
+Додаток Б – API для взаємодії серверної частини з клієнтами
+const express = require("express");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { sql } = require("./db");
+
+const router = express.Router();
+router.use(express.json());
+
+/**
+ * @swagger
+ * tags:
+ *   - name: Public
+ *     description: Доступно без авторизації
+ */
+/**
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     summary: Реєстрація нового користувача
+ *     tags: [Public]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               role:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Успішна реєстрація
+ */
+router.post("/auth/register", async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        if (!username || !password) {
+            return res.status(400).json({ error: "Усі поля обов'язкові" });
+        }
+
+        // Перевіряємо, чи існує користувач
+        const existingUser = await sql.query`SELECT * FROM Users WHERE username = ${username}`;
+        if (existingUser.recordset.length > 0) {
+            return res.status(400).json({ error: "Користувач вже існує" });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await sql.query`
+            INSERT INTO Users (username, password_hash, role)
+            VALUES (${username}, ${hashedPassword}, 'user')`;
+
+        res.status(201).json({ message: "Користувач зареєстрований" });
+    } catch (error) {
+        console.error("Помилка реєстрації:", error);
+        res.status(500).json({ error: "Помилка сервера" });
+    }
+});
+
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Авторизація користувача
+ *     tags: [Public]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Успішна авторизація
+ */
+router.post("/auth/login", async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        if (!username || !password) {
+            return res.status(400).json({ error: "Усі поля обов'язкові" });
+        }
+
+        const result = await sql.query`SELECT * FROM Users WHERE username = ${username}`;
+        const user = result.recordset[0];
+
+        if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+            return res.status(401).json({ error: "Невірний логін або пароль" });
+        }
+
+        res.json({ message: "Авторизація успішна" });
+    } catch (error) {
+        console.error("Помилка авторизації:", error);
+        res.status(500).json({ error: "Помилка сервера" });
+    }
+});
+
+module.exports = router;
