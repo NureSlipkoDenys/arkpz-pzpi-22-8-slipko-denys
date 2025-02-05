@@ -15,7 +15,7 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 // Налаштування HTTP сервера
-const char* serverUrl = "http://localhost:5000/api/vehicle-locations"; // Замініть на правильний URL
+const char* serverUrl = "http://localhost:5000/api/vehicle-locations"; 
 
 // Піни ультразвукового датчика
 #define TRIG_PIN 5
